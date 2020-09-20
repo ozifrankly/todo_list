@@ -1,10 +1,22 @@
 package main
 
 import (
+	"log"
+	"todo_list/repository"
 	"todo_list/todo"
 
 	"github.com/gofiber/fiber"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	db := repository.Connect()
+	db.Debug().AutoMigrate(&todo.Todo{})
+}
 
 func main() {
 	app := fiber.New()

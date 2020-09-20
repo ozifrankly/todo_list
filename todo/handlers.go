@@ -1,22 +1,21 @@
 package todo
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber"
 )
 
-var todos []Todo
-
-func init() {
-	todos = append(todos, Todo{Title: "Primeiro", Checked: true})
-	todos = append(todos, Todo{Title: "Segundo", Checked: false})
-}
-
 //All list all todos
 func All(c *fiber.Ctx) {
-	c.JSON(todos)
 	c.Append("content-type", "application/json")
+	todos, err := ListTodos()
+	if err != nil {
+		errorMessage(c, 500, err.Error())
+		return
+	}
+	c.JSON(todos)
 	c.SendStatus(200)
 }
 
@@ -24,16 +23,16 @@ func All(c *fiber.Ctx) {
 func Get(c *fiber.Ctx) {
 	c.Append("content-type", "application/json")
 	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil || id >= len(todos) {
-		c.JSON(&fiber.Map{
-			"ok":    false,
-			"error": "not found",
-		})
-		c.SendStatus(404)
+	if err != nil {
+		errorMessage(c, 400, "bad request")
 		return
 	}
 
-	todo := todos[id]
+	todo, err := GetTodo(id)
+	if err != nil {
+		errorMessage(c, 404, "not found")
+		return
+	}
 	c.JSON(todo)
 	c.SendStatus(200)
 }
@@ -43,28 +42,37 @@ func Add(c *fiber.Ctx) {
 	c.Append("content-type", "application/json")
 	todo := new(Todo)
 	if err := c.BodyParser(todo); err != nil {
-		c.Status(400).Send(err)
+		errorMessage(c, 400, "bad request")
 		return
 	}
-	todos = append(todos, *todo)
+
+	if err := CreateTodo(todo); err != nil {
+		errorMessage(c, 304, err.Error())
+		return
+	}
 	c.JSON(todo)
-	c.SendStatus(200)
+	c.SendStatus(201)
 }
 
 //Update modify a todo
 func Update(c *fiber.Ctx) {
 	c.Append("content-type", "application/json")
 	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil || id >= len(todos) {
-		c.Status(404).Send("not found")
+	if err != nil {
+		errorMessage(c, 404, "not found")
 		return
 	}
-	todo := new(Todo)
-	if err := c.BodyParser(todo); err != nil {
-		c.Status(400).Send("bad request")
+	params := new(Todo)
+	if err := c.BodyParser(params); err != nil {
+		errorMessage(c, 400, "bad request")
 		return
 	}
-	todos[id] = *todo
+	fmt.Println(params)
+	todo, err := UpdateTodo(id, params)
+	if err != nil {
+		errorMessage(c, 400, "bad request")
+		return
+	}
 	c.JSON(todo)
 	c.SendStatus(200)
 }
@@ -73,13 +81,25 @@ func Update(c *fiber.Ctx) {
 func Destroy(c *fiber.Ctx) {
 	c.Append("content-type", "application/json")
 	id, err := strconv.Atoi(c.Params("id"))
-	if err != nil || id >= len(todos) {
-		c.Status(404).Send("not found")
+	if err != nil {
+		errorMessage(c, 404, "not found")
 		return
 	}
-	todos = append(todos[:id], todos[id+1:]...)
+	err = DestroyTodo(id)
+	if err != nil {
+		errorMessage(c, 404, "not found")
+		return
+	}
 	c.JSON(&fiber.Map{
 		"ok": true,
 	})
 	c.SendStatus(200)
+}
+
+func errorMessage(c *fiber.Ctx, code int, message string) {
+	c.JSON(&fiber.Map{
+		"ok":    false,
+		"error": message,
+	})
+	c.SendStatus(code)
 }
