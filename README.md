@@ -1,2 +1,2 @@
 # todo_list
-A simple Rest API example in go.
+  É uma implementação simples de uma lista de todos para entender o funcionamento do framework Fiber
