@@ -5,7 +5,7 @@ import (
 	"todo_list/repository"
 	"todo_list/todo"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
 
@@ -26,6 +26,5 @@ func main() {
 	v1.Get("/todos/:id", todo.Get)
 	v1.Put("/todos/:id", todo.Update)
 	v1.Delete("/todos/:id", todo.Destroy)
-
-	app.Listen(3000)
+	app.Listen(":3000")
 }
