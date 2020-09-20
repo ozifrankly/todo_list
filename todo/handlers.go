@@ -19,7 +19,6 @@ func All(c *fiber.Ctx) error {
 
 //Get show a todo
 func Get(c *fiber.Ctx) error {
-	c.Append("content-type", "application/json")
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return errorMessage(c, 400, "bad request")
@@ -35,7 +34,6 @@ func Get(c *fiber.Ctx) error {
 
 //Add create a todo
 func Add(c *fiber.Ctx) error {
-	c.Append("content-type", "application/json")
 	todo := new(Todo)
 	if err := c.BodyParser(todo); err != nil {
 		return errorMessage(c, 400, "bad request")
@@ -50,7 +48,6 @@ func Add(c *fiber.Ctx) error {
 
 //Update modify a todo
 func Update(c *fiber.Ctx) error {
-	c.Append("content-type", "application/json")
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return errorMessage(c, 404, "not found")
@@ -70,7 +67,6 @@ func Update(c *fiber.Ctx) error {
 
 //Destroy remove a todo
 func Destroy(c *fiber.Ctx) error {
-	c.Append("content-type", "application/json")
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return errorMessage(c, 404, "not found")

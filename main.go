@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"todo_list/middleware"
 	"todo_list/repository"
 	"todo_list/todo"
 
@@ -20,6 +21,8 @@ func init() {
 
 func main() {
 	app := fiber.New()
+	app.Use(middleware.Header)
+
 	v1 := app.Group("api/v1")
 	v1.Get("/todos", todo.All)
 	v1.Post("/todos", todo.Add)
